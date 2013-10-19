@@ -1,0 +1,49 @@
+#!/bin/bash
+
+BASE=.
+
+files=`find $BASE -name "*.mp"`;
+
+echo $files
+
+echo "<!-- MetaUML Library of Patterns -->" > lop.html
+echo "<html><head><title>MetaUML Library of Patterns (UML for LaTeX/MetaPost)</title></head>" >> lop.html
+echo "<body>" >> lop.html
+echo "<h1>MetaUML Library of Patterns</h1>" >> lop.html
+echo "<h2>UML for LaTeX/MetaPost</h2>" >> lop.html
+echo "<p>Click on any of the UML class diagrams below to see the <a href='http://metauml.sourceforge.net/'>MetaUML</a> code that generated them.</p>" >> lop.html
+echo "<p>These UML diagrams are readily usable in LaTeX: see <a href='http://metauml.sourceforge.net/faq.html'>MetaUML FAQ</a> for details. The UML diagrams look even better when included from LaTeX: <a href='lop.pdf'>lop.pdf</a>, <a href='lop.tex'>lop.tex</a>. You can download the diagrams and their code from <a href="lop-release.tgz">here</a>.</p>" >> lop.html
+
+echo "\documentclass{article}" >lop.tex
+echo "\usepackage[pdftex]{graphicx} \DeclareGraphicsRule{*}{mps}{*}{} " >> lop.tex
+echo "\\title{MetaUML Library of Patterns}" >> lop.tex
+echo "\\author{Radu-George Radulescu and Ovidiu Gheorghies}" >> lop.tex
+echo "\\begin{document} \maketitle" >> lop.tex
+
+for current_file in $files; do
+    file_base=`echo $current_file | rev | cut -f 1 -d "/" | rev | cut -f 1 -d "."`
+    echo "Processing... $";
+
+    echo "mptopdf..."
+    #mptopdf $file_base.mp
+
+    echo "pdftoppm..."
+    #pdftoppm $file_base-1.pdf $file_base
+
+    echo "ppmtojpeg..."
+    #ppmtojpeg $file_base-000001.ppm > $file_base.jpg
+
+    rm *.mpo *.ppm *.pdf *.log
+
+    echo "<p><a href='$file_base.mp'><img src='$file_base.jpg'></a></p>" >> lop.html;
+
+    echo "\includegraphics[scale=.75]{$file_base.1} \\\\ \\vspace{2cm} \\\\" >> lop.tex;
+
+    echo "done."
+done
+
+echo "</body></html>" >> lop.html
+echo "\end{document}" >> lop.tex
+
+pdflatex lop
+
